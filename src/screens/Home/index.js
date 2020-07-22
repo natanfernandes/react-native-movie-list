@@ -1,86 +1,54 @@
-import React from 'react';
-import { View, Text, Button } from 'react-native';
-import styled from 'styled-components/native';
+import React, {useState, useEffect} from 'react';
+import {Wrapper, AppHeader, MoviesList, Loading, Error} from './components/index';
 import { connect } from 'react-redux';
-import {addMovie} from '../../state/actions';
+import { getPopularMovies, getMostWatchedMovies } from '../../state/actions';
 
-const Wrapper = styled.View`
-  padding: 15px;
-`;
-
-const Header = styled.Text`
-  font-size: 30px;
-  font-weight: bold;
-`;
-const ListWrapper = styled.SafeAreaView`
-  padding: 0px;
-`;
-const List = styled.FlatList`
-  padding: 5px;
-  height: 100%;
-`;
-const ListItem = styled.View`
-  padding: 5px;
-  background: #fff;
-  height: 150px;
-  width: 95%;
-  border-radius: 14px;
-  margin:5px;
-  margin-right:10px;
-  margin-top: 20px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  elevation: 5;
-`;
-const ListItemImageContainer = styled.View`
-  padding: 5px;
-  background: red;
-  height: 100%;
-  width: 30%;
-  margin:10px;
-  position: absolute;
-  bottom: 10px;
-  border-radius: 5px;
-`;
-const ListItemContainer = styled.View`
-  padding: 5px;
-  height: 100%;
-  width: 70%;
-  position: absolute;
-  right: 0;
-`;
-const ListItemTitle = styled.Text`
-  font-size: 20px;
-  font-weight: normal;
-`;
-const ListItemYear = styled.Text`
-  font-size: 17px;
-  font-weight: normal;
-`;
 const Home = (props) => {
-  console.log(props)
-  
-  const renderItem = ({ item }) => {
+  const { movies } = props
+  const [selectedCategory, setSelectedCategory] = useState('popular');
 
-  return (
-    <ListItem>
-      <ListItemImageContainer></ListItemImageContainer>
-      <ListItemContainer>
-        <ListItemTitle>{item.movie.title}</ListItemTitle>
-        <ListItemYear>{item.movie.year}</ListItemYear>
-      </ListItemContainer>
-    </ListItem>
-  )};
+  useEffect(() => {
+    if(selectedCategory === 'popular'){
+      props.getPopularMovies();
+    } else{
+      props.getMostWatchedMovies();
+    }
+  }, [selectedCategory])
+
+  const renderMoviesList = () => {
+    if(!movies.popularMovies.error && !movies.popularMovies.isLoading && selectedCategory === 'popular'){
+      return (
+        <MoviesList movies={movies.popularMovies}></MoviesList>
+      )
+    } else if(movies.popularMovies.isLoading){
+      return (
+        <Loading text="Carregando filmes populares..."></Loading>
+      )
+    } else if(movies.popularMovies.error && selectedCategory === 'popular'){
+      return (
+        <Error refreshMovies={() => props.getPopularMovies()}></Error>
+      )
+    }
+
+    if(!movies.mostWatchedMovies.error && !movies.mostWatchedMovies.isLoading && selectedCategory === 'watched'){
+      return (
+        <MoviesList movies={movies.mostWatchedMovies} ></MoviesList>
+      )
+    } else if(movies.mostWatchedMovies.isLoading){
+      return (
+        <Loading text="Carregando filmes mais assistidos..."></Loading>
+      )
+    } else if(movies.mostWatchedMovies.error && selectedCategory === 'watched'){
+      return (
+        <Error refreshMovies={() => props.getMostWatchedMovies()}></Error>
+      )
+    }
+  }
 
   return (
     <Wrapper>
-        <Header>Filmes</Header>
-        <Button onPress={() => props.addMovie()} title="asdas"></Button>
-        <ListWrapper>
-            <List 
-              data={props.movies.defaultMovies}
-              renderItem={renderItem}
-              keyExtractor={item => item.id}/>
-        </ListWrapper>
+      <AppHeader selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory}></AppHeader>
+      {renderMoviesList()}
     </Wrapper>
   );
 }
@@ -93,7 +61,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addMovie: () => dispatch(addMovie())
+    getPopularMovies: () => dispatch(getPopularMovies()),
+    getMostWatchedMovies: () => dispatch(getMostWatchedMovies())
   }
 }
 

@@ -1,7 +1,7 @@
 import traktApi from './index';
 
 const makeRequest = async (method, endpoint) => {
-    switch(method){
+    switch (method) {
         case 'GET':
             try {
                 const response = await traktApi.get(endpoint);
@@ -10,7 +10,7 @@ const makeRequest = async (method, endpoint) => {
                     error: false
                 }
                 return returnType;
-                
+
             } catch (error) {
                 const returnType = {
                     data: response.data,

@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {View, ScrollView} from 'react-native'
 import {Wrapper, AppHeader, MoviesList, Loading, Error} from './components/index';
 import { connect } from 'react-redux';
 import { getPopularMovies, getMostWatchedMovies } from '../../state/actions';
